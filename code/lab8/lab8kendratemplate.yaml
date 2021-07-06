@@ -1,0 +1,173 @@
+Resources:
+      
+  ##Create the Role needed to create a Kendra Index
+  KendraIndexRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: kendra.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    'cloudwatch:namespace': 'Kendra'
+                Action:
+                  - 'cloudwatch:PutMetricData'
+              - Effect: Allow
+                Resource: '*'
+                Action: 'logs:DescribeLogGroups'
+              - Effect: Allow
+                Resource: !Sub
+                  - 'arn:aws:logs:${region}:${account}:log-group:/aws/kendra/*'
+                  - region: !Ref 'AWS::Region'
+                    account: !Ref 'AWS::AccountId'
+                Action: 'logs:CreateLogGroup'
+              - Effect: Allow
+                Resource: !Sub
+                  - 'arn:aws:logs:${region}:${account}:log-group:/aws/kendra/*:log-stream:*'
+                  - region: !Ref 'AWS::Region'
+                    account: !Ref 'AWS::AccountId'
+                Action: 
+                  - 'logs:DescribeLogStreams'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+          PolicyName: KendraUnivIndexPolicy
+      RoleName: KendraUnivIndexRole
+      
+  ##Create the Kendra Index
+  UnivKendraIndex:
+    Type: 'AWS::Kendra::Index'
+    Properties:
+      Edition: 'DEVELOPER_EDITION'
+      DocumentMetadataConfigurations:
+        - Name: 'COMMERCIAL_ITEM'
+          Type: 'STRING_LIST_VALUE'
+          Search:
+            Displayable: true
+            Facetable: false
+            Searchable: true
+        - Name: 'DATE'
+          Type: 'STRING_LIST_VALUE'
+          Search:
+            Displayable: true
+            Facetable: false
+            Searchable: true
+        - Name: 'EVENT'
+          Type: 'STRING_LIST_VALUE'
+          Search:
+            Displayable: true
+            Facetable: false
+            Searchable: true
+        - Name: 'LOCATION'
+          Type: 'STRING_LIST_VALUE'
+          Search:
+            Displayable: true
+            Facetable: true
+            Searchable: true
+        - Name: 'ORGANIZATION'
+          Type: 'STRING_LIST_VALUE'
+          Search:
+            Displayable: true
+            Facetable: true
+            Searchable: true
+        - Name: 'OTHER'
+          Type: 'STRING_LIST_VALUE'
+          Search:
+            Displayable: true
+            Facetable: false
+            Searchable: true
+        - Name: 'PERSON'
+          Type: 'STRING_LIST_VALUE'
+          Search:
+            Displayable: true
+            Facetable: true
+            Searchable: true
+        - Name: 'QUANTITY'
+          Type: 'STRING_LIST_VALUE'
+          Search:
+            Displayable: true
+            Facetable: false
+            Searchable: true
+        - Name: 'TITLE'
+          Type: 'STRING_LIST_VALUE'
+          Search:
+            Displayable: true
+            Facetable: true
+            Searchable: true
+      Name: 'UniversityIndex'
+      RoleArn: !GetAtt KendraIndexRole.Arn
+
+  ##Create the Role needed to attach the S3 Data Source
+  KendraDSRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: kendra.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Resource: !Sub
+                  - 'arn:aws:s3:::${dsbucket}/*'
+                  - dsbucket: !Ref S3DataSourceBucket
+                Action: 's3:GetObject'
+              - Effect: Allow
+                Resource: !Sub
+                  - 'arn:aws:s3:::${dsbucket}'
+                  - dsbucket: !Ref S3DataSourceBucket
+                Action: 's3:ListBucket'
+              - Effect: Allow
+                Resource: !Sub
+                  - 'arn:aws:kendra:${region}:${account}:index/${index}'
+                  - region: !Ref 'AWS::Region'
+                    account: !Ref 'AWS::AccountId'
+                    index: !GetAtt UnivKendraIndex.Id
+                Action:
+                  - 'kendra:BatchPutDocument'
+                  - 'kendra:BatchDeleteDocument'
+          PolicyName: KendraUnivDSPolicy
+      RoleName: KendraUnivDSRole
+  
+  ##Attach S3 Data Source
+  KendraDocDS:
+    Type: 'AWS::Kendra::DataSource'
+    Properties: 
+      DataSourceConfiguration: 
+        S3Configuration:
+          BucketName: !Ref S3DataSourceBucket
+          DocumentsMetadataConfiguration:
+            S3Prefix: 'Meta/'
+          InclusionPrefixes:
+            - 'Data/'
+      IndexId: !GetAtt UnivKendraIndex.Id
+      Name: 'UniversityDataSource'
+      RoleArn: !GetAtt KendraDSRole.Arn
+      Type: 'S3'
+    
+
+      
+Parameters:
+  S3DataSourceBucket:
+    Type: String
+Outputs:
+  KendraIndexID:
+    Value: !GetAtt UnivKendraIndex.Id
+  KendraDatasourceID:
+    Value: !GetAtt KendraDocDS.Id
