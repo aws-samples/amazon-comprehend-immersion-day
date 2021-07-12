@@ -14,7 +14,7 @@ For a Comprehend Immersion Day, you need to use your own AWS accounts. In that c
 
 
 
-## Deploy 1 click to setup labs
+## Deploy 1 click to setup labs or follow Prerequisite section of this site 
 Deploy a cloud formation template that will perform much of the initial setup work for you. In a another browser window or tab, login to your AWS account. Once you have done that, open the link below by clicking Launch Stack button in a new tab to start the process of deploying  the items you need via CloudFormatoin.
 
 This CloudFormation template will complete the following:
