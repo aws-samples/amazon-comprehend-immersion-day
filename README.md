@@ -22,9 +22,13 @@ This CloudFormation template will complete the following:
 2. Create a SageMaker Notebook instance
 3. Clone this repo codebase onto the Notebook instance.
 
-[![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=comprehend-immersion-dayURL=https://ai-ml-services-lab.s3.amazonaws.com/public/labs/textract/cfntextracta2i.yaml)
+[![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks
 
-Follow along with the screenshots below if you to deplpy the stack.
+
+## Overview of the Labs
+
+Find details on each lab here - https://comprehend-immersionday.workshop.aws/ 
+
 ## License
 
 This library is licensed under the MIT-0 License. See the LICENSE file.
