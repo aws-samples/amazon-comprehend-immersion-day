@@ -32,9 +32,9 @@ This CloudFormation template will complete the following:
 8. Your Stack will be Create in Progress, In few minutes the status will change to "Craete Complete".
 9. Once Status changes to "Craete Complete", Go to Sagemaker Console Notebook Instance -> https://console.aws.amazon.com/sagemaker/home?region=us-east-1#/notebook-instances
 10. A notebook has been craeted with all the lab code setup, Click on Open Jupyter as shown below:
-![](arch.JPG)
+![](comprehend-im-jupyter.PNG)
 12. Click on folder amazon-comprehend-immersion-day->code and you will find the respective labs. Follow the lab instructions for each lab.
-![](arch.JPG)
+![](laboverview-comp-imday.PNG)
 
 
 
