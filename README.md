@@ -25,12 +25,16 @@ This CloudFormation template will complete the following:
 1. Download stack (https://comprehend-immersionday.workshop.aws/code/prerequisites/comprehend-im-setup.yml)
 2. Click Cloudformation console link https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template
 3. Select "Upload a template file"  and Choose the downloaded template "comprehend-im-setup.yml" as shown in below screenshot and click next.
-4. For Stack name -> Enter "Comprehend Immersion day", scroll down and click next till you reach review. 
-5. For Capabilities, check the on Acknowledge box as shown below and click on "Create Stack" button.
-6. Your Stack will be Create in Progress, In few minutes the status will change to "Craete Complete".
-7. Once Status changes to "Craete Complete", Go to Sagemaker Console Notebook Instance -> https://console.aws.amazon.com/sagemaker/home?region=us-east-1#/notebook-instances
-8. A notebook has been craeted with all the lab code setup, Click on Open Jupyter as shown below:
-9. Click on folder amazon-comprehend-immersion-day->code and you will find the respective labs. Follow the lab instructions for each lab.
+![](arch.JPG)
+5. For Stack name -> Enter "Comprehend Immersion day", scroll down and click next till you reach review. 
+6. For Capabilities, check the on Acknowledge box as shown below and click on "Create Stack" button.
+![](arch.JPG)
+8. Your Stack will be Create in Progress, In few minutes the status will change to "Craete Complete".
+9. Once Status changes to "Craete Complete", Go to Sagemaker Console Notebook Instance -> https://console.aws.amazon.com/sagemaker/home?region=us-east-1#/notebook-instances
+10. A notebook has been craeted with all the lab code setup, Click on Open Jupyter as shown below:
+![](arch.JPG)
+12. Click on folder amazon-comprehend-immersion-day->code and you will find the respective labs. Follow the lab instructions for each lab.
+![](arch.JPG)
 
 
 
