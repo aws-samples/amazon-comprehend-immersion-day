@@ -25,7 +25,7 @@ This CloudFormation template will complete the following:
 1. Download stack (https://comprehend-immersionday.workshop.aws/code/prerequisites/comprehend-im-setup.yml)
 2. Click Cloudformation console link https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template
 3. Select "Upload a template file"  and Choose the downloaded template "comprehend-im-setup.yml" as shown in below screenshot and click next.
-![](arch.JPG)
+![](createstack.PNG)
 5. For Stack name -> Enter "Comprehend Immersion day", scroll down and click next till you reach review. 
 6. For Capabilities, check the on Acknowledge box as shown below and click on "Create Stack" button.
 ![](arch.JPG)
