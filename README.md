@@ -14,7 +14,7 @@ For a Comprehend Immersion Day, you need to use your own AWS accounts. In that c
 
 
 
-## Deploy 1 click to setup labs or follow Prerequisite section of this site 
+## Deploy Cloudformation setup labs or follow Prerequisite section of this site 
 Deploy a cloud formation template that will perform much of the initial setup work for you. In a another browser window or tab, login to your AWS account. Once you have done that, open the link below by clicking Launch Stack button in a new tab to start the process of deploying  the items you need via CloudFormatoin.
 
 This CloudFormation template will complete the following:
@@ -22,7 +22,24 @@ This CloudFormation template will complete the following:
 2. Create a SageMaker Notebook instance
 3. Clone this repo codebase onto the Notebook instance.
 
-[![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks
+Download stack (https://comprehend-immersionday.workshop.aws/code/prerequisites/comprehend-im-setup.yml)
+Click Cloudformation console link https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template
+Select "Upload a template file"  and Choose the downloaded template "comprehend-im-setup.yml" as shown in below screenshot and click next.
+
+For Stack name -> Enter "Comprehend Immersion day", scroll down and click next till you reach review. 
+For Capabilities, check the on Acknowledge box as shown below and click on "Create Stack" button.
+Your Stack will be Create in Progress, In few minutes the status will change to "Craete Complete".
+Once Status changes to "Craete Complete", Go to Sagemaker Console Notebook Instance -> https://console.aws.amazon.com/sagemaker/home?region=us-east-1#/notebook-instances
+A notebook has been craeted with all the lab code setup, Click on Open Jupyter as shown below:
+
+Click on folder amazon-comprehend-immersion-day->code and you will find the respective labs. Follow the lab instructions for each lab.
+
+
+
+
+
+
+[![Download Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://comprehend-immersionday.workshop.aws/code/prerequisites/comprehend-im-setup.yml)
 
 
 ## Overview of the Labs
