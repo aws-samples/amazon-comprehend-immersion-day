@@ -1,0 +1,119 @@
+Parameters:
+  KendraLambdaRole:
+    Type: String
+
+Resources:
+  ##Create the Lambda
+  postextractionlambda:
+      Type: AWS::Lambda::Function
+      Properties:
+        Runtime: python3.8
+        Role: !Ref KendraLambdaRole
+        Handler: index.lambda_handler
+        Timeout: 60
+        MemorySize: 1024
+        Code:
+          ZipFile: |
+            import json
+            import boto3
+            import logging
+            from botocore.exceptions import ClientError
+            
+            logger = logging.getLogger()
+            logger.setLevel(logging.INFO)
+            
+            s3 = boto3.client('s3')
+            
+            #Maximum number of strings in a STRING_LIST type attribute allowed by Kendra, default is 10, it can be increased on request
+            elimit = 10
+            
+            #The minimum value we want to consider of the confidence score of recognized entity as returned by Comprehend
+            min_score = 0.97
+            
+            #Comprehend realtime analysis has a limit of ~ 100K characters, we are using 20K
+            compre_text_size = 20000
+            
+            compre = boto3.client(service_name='comprehend')
+            
+            #List of categories recognized by Comprehend
+            categories = ["COMMERCIAL_ITEM", "DATE", "EVENT", "LOCATION", "ORGANIZATION", "OTHER", "PERSON", "QUANTITY", "TITLE"]
+            
+            #The function to read a wikipedia page as a text file and detect entities in it using Comprehend 
+            def entity_detector(doc_text):
+                #List of JSON objects to store entities
+                entity_data = dict()
+                #List of observed text strings recognized as categories
+                category_text = dict()
+                #Frequency of each text string
+                text_frequency = dict()
+                for et in categories:
+                    entity_data[ et ] = []
+                    category_text[ et ] = []
+                    text_frequency[ et ] = dict()
+                #Make detect_entities_v2 call in a loop to work with the text limit
+                for i in range(0, len(doc_text), compre_text_size):
+                    try:
+                        entities = compre.detect_entities(Text=doc_text[i:i+compre_text_size], LanguageCode='en')
+                    except:
+                        logger.info("Exitting - detect_entities_v2 terminated with exception")
+                        return []
+                    for e in entities["Entities"]:
+                        #For each of the recognized entities take only those that have confidence score higher than min_score, 
+                        #are printable, dont contain quotes and are previously unseen
+                        if ((e["Score"] > min_score) and (e["Text"].isprintable()) and (not "\"" in e["Text"]) and (not e["Text"].upper() in category_text[e["Type"]])):
+                            #Append the text to entity data to be used for a Kendra custom attribute
+                            entity_data[e["Type"]].append(e["Text"])
+                            #Keep track of text in upper case so that we don't treat the same text written in different cases differently
+                            category_text[e["Type"]].append(e["Text"].upper())
+                            #Keep track of the frequency of the text so that we can take the text with highest frequency of occurrance
+                            text_frequency[e["Type"]][e["Text"].upper()] = 1
+                        elif (e["Text"].upper() in category_text[e["Type"]]):
+                            #Keep track of the frequency of the text so that we can take the text with highest frequency of occurrance
+                            text_frequency[e["Type"]][e["Text"].upper()] += 1
+                #The Kendra attribute metadata JSON object to be populated
+                metadata = dict()
+                for et in categories:
+                    metadata[et] = []
+                    #Take at most elimit number of recognized text strings having the highest frequency of occurrance
+                    el = [pair[0] for pair in sorted(text_frequency[et].items(), key=lambda item: item[1], reverse=True)][0:elimit]
+                    for d in entity_data[et]:
+                        if (d.upper() in el):
+                            metadata[et].append(d)
+                metaUL = []
+                for md in metadata:
+                    metaUL.append({
+                        "name": md,
+                        "value": {
+                            "stringListValue": metadata[md]
+                        }
+                    })
+                return metaUL
+                
+            def lambda_handler(event, context):
+                logger.info("Received event: %s" % json.dumps(event))
+                s3_bucket = event.get("s3Bucket")
+                s3_key = event.get("s3ObjectKey")
+                metadata = event.get("metadata")
+                kendra_document_object = s3.get_object(Bucket = s3_bucket, Key = s3_key)
+                kendra_document_string = kendra_document_object['Body'].read()
+                kendra_document = json.loads(kendra_document_string)
+                categories = [ d.get("value").get("stringValue") for d in metadata.get("attributes") if d.get("name") == "_category"]
+                if (len(categories) > 0) and (categories[0] == 'University_Data'):
+                    logger.info("Calling entity_detector")
+                    metaUL = entity_detector(kendra_document.get("textContent").get("documentBodyText"))
+                else:
+                    metaUL = []
+                logger.info("MetadataUpdates: %s" % json.dumps(metaUL))
+                return {
+                    "version" : "v0",
+                    "s3ObjectKey": s3_key,
+                    "metadataUpdates": metaUL
+                }
+        Description: Invoke a function during stack creation.
+        TracingConfig:
+          Mode: Active
+
+Outputs:
+  KendraLambdaArn:
+    Value: !GetAtt postextractionlambda.Arn
+ 
